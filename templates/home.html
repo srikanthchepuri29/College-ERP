@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to College ERP - Enterprise Management System{% endblock %}
+
+{% block extra_css %}
+    footer a {
+        transition: all 0.25s ease-in-out;
+    }
+    footer a:hover {
+        color: #06b6d4 !important;
+        opacity: 1 !important;
+        padding-left: 4px;
+    }
+    footer .d-flex a {
+        transition: all 0.25s ease-in-out;
+        display: inline-block;
+    }
+    footer .d-flex a:hover {
+        color: #06b6d4 !important;
+        transform: scale(1.2);
+    }
+{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span>ERP</span></a>
+        <button class="navbar-brand navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link active me-3" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link me-3" href="#about">About</a></li>
+                <li class="nav-item"><a class="nav-link me-3" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link me-3" href="#contact">Contact</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle btn btn-outline-primary px-3 py-2 text-dark d-inline-flex align-items-center me-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item py-2" href="{% url 'admin_login' %}"><i class="bi bi-shield-lock me-2 text-danger"></i>Admin Dashboard</a></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'faculty_login' %}"><i class="bi bi-person-badge me-2 text-primary"></i>Faculty Dashboard</a></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'student_login' %}"><i class="bi bi-people me-2 text-success"></i>Student Dashboard</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="home" class="py-5 bg-gradient" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); min-height: 85vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="badge bg-indigo-subtle text-primary border border-primary-subtle px-3 py-2 mb-3 rounded-pill" style="font-weight: 600;">
+                    <i class="bi bi-rocket-takeoff me-1"></i> Next-Generation College SaaS
+                </div>
+                <h1 class="display-3 fw-extrabold text-slate-900 mb-4" style="line-height: 1.1; letter-spacing: -2px;">
+                    Digitize and Automate <br><span class="text-primary">Academic Operations</span>
+                </h1>
+                <p class="lead text-muted mb-4">
+                    An all-in-one, enterprise-grade ERP system built for administrators, faculty, and students. Manage LMS, track attendance, take quizzes, run coding compilers, submit assignments, and view transcripts in a unified workspace.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'student_login' %}" class="btn btn-primary btn-lg shadow-sm">Get Started</a>
+                    <a href="#features" class="btn btn-outline-secondary btn-lg border-2">Explore Features</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <!-- A beautiful abstract vector or dashboard representation -->
+                <div class="position-relative d-inline-block">
+                    <div class="position-absolute top-50 start-50 translate-middle bg-primary rounded-circle filter blur-3xl opacity-20" style="width: 400px; height: 400px; z-index: 1;"></div>
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden position-relative" style="z-index: 2; max-width: 500px;">
+                        <div class="bg-dark p-3 text-start d-flex gap-2">
+                            <span class="rounded-circle bg-danger" style="width: 12px; height: 12px; display: inline-block;"></span>
+                            <span class="rounded-circle bg-warning" style="width: 12px; height: 12px; display: inline-block;"></span>
+                            <span class="rounded-circle bg-success" style="width: 12px; height: 12px; display: inline-block;"></span>
+                        </div>
+                        <div class="bg-secondary p-4 text-white text-start">
+                            <h4 class="mb-2"><i class="bi bi-code-slash me-2 text-accent"></i>Coding Arena Problem</h4>
+                            <p class="text-light small">Find the sum of all elements in an array.</p>
+                            <pre class="bg-dark text-success p-3 rounded small mb-0"><code>def array_sum(arr):
+    # Student Code input
+    return sum(arr)</code></pre>
+                        </div>
+                        <div class="card-footer bg-light py-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="bi bi-clock me-1"></i> Time Limit: 2.0s</span>
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Accepted (45ms)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5 bg-white border-bottom border-top border-light">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="p-3">
+                    <h2 class="display-4 fw-bold text-primary">{{ total_students|default:"120" }}+</h2>
+                    <p class="text-muted mb-0 fw-semibold">Active Students</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="p-3">
+                    <h2 class="display-4 fw-bold text-primary">{{ total_faculty|default:"18" }}+</h2>
+                    <p class="text-muted mb-0 fw-semibold">Qualified Faculty</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3">
+                    <h2 class="display-4 fw-bold text-primary">{{ total_depts|default:"6" }}</h2>
+                    <p class="text-muted mb-0 fw-semibold">Academic Departments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="card border-0 shadow rounded-4 p-5 bg-dark text-white">
+                    <h3 class="mb-3 text-indigo">System Architecture</h3>
+                    <p class="text-light">
+                        Our ERP platform is engineered on top of a highly modular Python/Django architecture, offering separation of concern layers and strict security.
+                    </p>
+                    <ul class="list-unstyled text-light mt-3">
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Role-Based Access Control (RBAC)</li>
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> JWT Session Authentication</li>
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Subprocess Coding Sandbox Compiler</li>
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-2"></i> Modern responsive charts with Chart.js</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6 ps-lg-5">
+                <h2 class="fw-bold mb-4">About the ERP Platform</h2>
+                <p class="text-muted">
+                    This Next-Generation College ERP System solves the communication gap between students, educators, and administrators. It digitizes administrative workloads such as admission confirmation, fee record management, and notice publishing.
+                </p>
+                <p class="text-muted">
+                    Educators can track student attendance records easily with standard daily status dashboards, assign coursework dynamically, and organize downloadable learning materials subject-wise.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Platform Core Modules</h2>
+            <p class="text-muted max-w-2xl mx-auto">Explore the tools built directly inside the ERP workspace to support academic success.</p>
+        </div>
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-3 hover-card">
+                    <div class="rounded-3 bg-primary bg-opacity-10 p-3 d-inline-block text-primary mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-journal-bookmark-fill fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Learning Management System</h5>
+                    <p class="text-muted small">Upload PDFs, slide decks, and external URLs. Filter by subjects and track downloads in real time.</p>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-3 hover-card">
+                    <div class="rounded-3 bg-success bg-opacity-10 p-3 d-inline-block text-success mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-cpu fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Coding Practice Arena</h5>
+                    <p class="text-muted small">Submit Python scripts directly into a web-based code editor, and see compiler statuses and runtime details instantly.</p>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-3 hover-card">
+                    <div class="rounded-3 bg-danger bg-opacity-10 p-3 d-inline-block text-danger mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-check-square fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">MCQ Quiz Wizard</h5>
+                    <p class="text-muted small">Solve time-limited, subject-organized multiple-choice quizzes with automatic scoring and leaderboards.</p>
+                </div>
+            </div>
+            <!-- Feature 4 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-3 hover-card">
+                    <div class="rounded-3 bg-warning bg-opacity-10 p-3 d-inline-block text-warning mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-file-earmark-arrow-up fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Assignment Tracking</h5>
+                    <p class="text-muted small">Track pending deadlines. Students upload file submissions, and faculty can provide comments and grades.</p>
+                </div>
+            </div>
+            <!-- Feature 5 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-3 hover-card">
+                    <div class="rounded-3 bg-info bg-opacity-10 p-3 d-inline-block text-info mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-calendar-check fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Attendance Logging</h5>
+                    <p class="text-muted small">Educators can mark daily attendance. Calculates overall percentages and flags under-attendance alerts.</p>
+                </div>
+            </div>
+            <!-- Feature 6 -->
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm p-4 rounded-3 hover-card">
+                    <div class="rounded-3 bg-secondary bg-opacity-10 p-3 d-inline-block text-secondary mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-card-text fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold">Exam Result Transcripts</h5>
+                    <p class="text-muted small">Access final internal and external assessment results, GPAs, and transcripts instantly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-5 bg-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Contact Support</h2>
+                    <p class="text-muted">Have a query? Message our administration division.</p>
+                </div>
+                <form class="card border-0 shadow p-4 rounded-4">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="John Doe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" placeholder="name@college.edu" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" rows="4" placeholder="Your inquiry details..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-3" onclick="event.preventDefault(); alert('Inquiry sent successfully!');">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white pt-5 pb-4">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Column 1: About & Info -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="fw-bold mb-3"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span class="text-primary">ERP</span></h5>
+                <p class="text-light small opacity-75">
+                    A next-generation modular management platform designed to automate and digitize academic workflows for student success.
+                </p>
+                <div class="d-flex gap-3 mt-3">
+                    <a href="#" class="text-white hover-opacity"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="text-white hover-opacity"><i class="bi bi-twitter fs-5"></i></a>
+                    <a href="#" class="text-white hover-opacity"><i class="bi bi-linkedin fs-5"></i></a>
+                    <a href="#" class="text-white hover-opacity"><i class="bi bi-github fs-5"></i></a>
+                </div>
+            </div>
+            
+            <!-- Column 2: Portals -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold mb-3 text-uppercase text-white opacity-90">Dashboard Entrances</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a href="{% url 'admin_login' %}" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-shield-lock-fill me-2 text-danger"></i>Admin Login</a></li>
+                    <li class="mb-2"><a href="{% url 'faculty_login' %}" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-person-badge-fill me-2 text-info"></i>Faculty Login</a></li>
+                    <li class="mb-2"><a href="{% url 'student_login' %}" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-people-fill me-2 text-success"></i>Student Login</a></li>
+                </ul>
+            </div>
+            
+            <!-- Column 3: Features -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold mb-3 text-uppercase text-white opacity-90">Academic Features</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a href="#features" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-journal-bookmark-fill me-2"></i>LMS Module</a></li>
+                    <li class="mb-2"><a href="#features" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-cpu-fill me-2"></i>MCQ Quiz Arena</a></li>
+                    <li class="mb-2"><a href="#features" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-code-slash me-2"></i>Coding Sandbox</a></li>
+                    <li class="mb-2"><a href="#features" class="text-light text-decoration-none opacity-75 hover-white"><i class="bi bi-file-earmark-code-fill me-2"></i>Assignments</a></li>
+                </ul>
+            </div>
+            
+            <!-- Column 4: Newsletter & Search -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold mb-3 text-uppercase text-white opacity-90">Global Search</h6>
+                <p class="text-light small opacity-75 mb-3">Quickly search topics or subscribe to notice bulletins.</p>
+                <form class="mb-2" onsubmit="event.preventDefault(); alert('Subscribed successfully!');">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control border-secondary bg-dark text-white" placeholder="Search or Subscribe..." aria-label="Search">
+                        <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-send-fill"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <hr class="my-4 border-secondary opacity-25">
+        
+        <div class="text-center text-light small opacity-75 mb-2">
+            &copy; 2026 College ERP System. Built with Django REST Framework & Bootstrap 5.
+        </div>
+        <div class="text-center text-light small opacity-50">
+            All rights reserved. Designed for portfolios & real-world scaling.
+        </div>
+    </div>
+</footer>
+{% endblock %}

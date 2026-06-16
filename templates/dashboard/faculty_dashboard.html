@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Dashboard - College ERP{% endblock %}
+
+{% block extra_css %}
+    body {
+        background-color: #f8fafc;
+    }
+    .dashboard-container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+    .sidebar {
+        width: var(--sidebar-width);
+        background-color: var(--secondary-color);
+        color: white;
+        flex-shrink: 0;
+        z-index: 100;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    .sidebar .nav-link {
+        color: #94a3b8;
+        padding: 0.8rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .sidebar .nav-link.active {
+        border-left: 4px solid var(--accent-color);
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    .main-workspace {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        height: 100vh;
+        overflow: hidden;
+    }
+    .main-content {
+        flex-grow: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+    .nav-header {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+    .card-grad-fac {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-md-block">
+        <div class="p-4 border-bottom border-secondary">
+            <h4 class="fw-bold mb-0 text-white"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span>ERP</span></h4>
+            <span class="badge bg-info mt-2">Faculty Instructor</span>
+        </div>
+        <ul class="nav flex-column py-3">
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'faculty_dashboard' %}active{% endif %}" href="{% url 'faculty_dashboard' %}"><i class="bi bi-speedometer2"></i> Overview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'faculty_schedule' %}active{% endif %}" href="{% url 'faculty_schedule' %}"><i class="bi bi-calendar3"></i> Class Schedule</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'faculty_attendance' %}active{% endif %}" href="{% url 'faculty_attendance' %}"><i class="bi bi-calendar-check"></i> Attendance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'faculty_marks' %}active{% endif %}" href="{% url 'faculty_marks' %}"><i class="bi bi-award"></i> Student Marks</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'faculty_dashboard' %}#evaluations"><i class="bi bi-file-earmark-check"></i> Evaluate Submission</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house-door"></i> View Homepage</a>
+            </li>
+            <li class="nav-item mt-5">
+                <a class="nav-link text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left"></i> Logout</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="main-workspace w-100">
+        <!-- Top Nav Header -->
+        <header class="nav-header">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-person-workspace me-2 text-info"></i>Faculty Control Center</h5>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                    <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 600;">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                    <span>Prof. {{ request.user.last_name }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><a class="dropdown-item py-2" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left me-2 text-danger"></i>Logout</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Main Body Content -->
+        <main class="main-content">
+            <!-- Faculty Welcome & Details -->
+            <div class="card border-0 shadow-sm p-4 rounded-3 mb-4 bg-white">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                        <div class="bg-light text-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                            <i class="bi bi-person-vcard fs-1"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <h4 class="fw-bold mb-1">Welcome back, {{ request.user.first_name }} {{ request.user.last_name }}!</h4>
+                        <p class="text-muted mb-0 small">
+                            <strong>Faculty ID:</strong> {{ profile.faculty_id }} | 
+                            <strong>Department:</strong> {{ profile.department.name|default:"Not Assigned" }} | 
+                            <strong>Designation:</strong> {{ profile.designation|default:"Professor" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Dashboard Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card stat-card card-grad-fac p-4 shadow-sm h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase small fw-bold">Assigned Subjects</h6>
+                                <h2 class="fw-extrabold mb-0">{{ subjects_count }}</h2>
+                            </div>
+                            <i class="bi bi-journal-bookmark fs-1 opacity-50 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card stat-card card-grad-fac p-4 shadow-sm h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase small fw-bold">Created Quizzes</h6>
+                                <h2 class="fw-extrabold mb-0">{{ quizzes_count }}</h2>
+                            </div>
+                            <i class="bi bi-cpu fs-1 opacity-50 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card stat-card card-grad-fac p-4 shadow-sm h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase small fw-bold">Assignments Given</h6>
+                                <h2 class="fw-extrabold mb-0">{{ assignments_count }}</h2>
+                            </div>
+                            <i class="bi bi-file-earmark-arrow-up fs-1 opacity-50 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card stat-card card-grad-fac p-4 shadow-sm h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 text-uppercase small fw-bold">Submissions to Grade</h6>
+                                <h2 class="fw-extrabold mb-0 text-warning">{{ pending_submissions.count }}</h2>
+                            </div>
+                            <i class="bi bi-clipboard2-check fs-1 opacity-50 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subjects & Course Work -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm p-4 h-100 rounded-3 bg-white">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-book-half me-2 text-info"></i>Assigned Curriculum</h5>
+                        {% if subjects %}
+                        <div class="list-group list-group-flush">
+                            {% for sub in subjects %}
+                            <div class="list-group-item py-3 px-0 d-flex justify-content-between align-items-center bg-transparent">
+                                <div>
+                                    <h6 class="fw-bold mb-1">{{ sub.name }}</h6>
+                                    <span class="badge bg-light text-secondary">Code: {{ sub.code }}</span>
+                                    <span class="badge bg-light text-secondary">Credits: {{ sub.credits }}</span>
+                                </div>
+                                <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill">Semester {{ sub.semester }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-light text-center py-5 mb-0">You are not currently assigned to any subjects.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm p-4 h-100 rounded-3 bg-white">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-info"></i>Active Quizzes & Assignments</h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#addQuizModal">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Quiz
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Assignment
+                                </button>
+                            </div>
+                        </div>
+                        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active btn-sm" id="pills-quizzes-tab" data-bs-toggle="pill" data-bs-target="#pills-quizzes" type="button" role="tab">Quizzes</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link btn-sm" id="pills-assignments-tab" data-bs-toggle="pill" data-bs-target="#pills-assignments" type="button" role="tab">Assignments</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="pills-tabContent">
+                            <!-- Quizzes Tab -->
+                            <div class="tab-pane fade show active" id="pills-quizzes" role="tabpanel">
+                                {% if quizzes %}
+                                <div class="table-responsive">
+                                    <table class="table align-middle table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Subject</th>
+                                                <th>Duration</th>
+                                                <th>Questions</th>
+                                                <th class="text-end">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for quiz in quizzes %}
+                                            <tr>
+                                                <td class="fw-semibold">{{ quiz.title }}</td>
+                                                <td><code>{{ quiz.subject.code }}</code></td>
+                                                <td>{{ quiz.duration_minutes }} mins</td>
+                                                <td>
+                                                    <span class="badge bg-secondary">{{ quiz.questions.count }} Qs</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <button class="btn btn-sm btn-info text-white px-2 py-1 rounded" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#addQuestionModal" 
+                                                            data-quiz-id="{{ quiz.id }}" 
+                                                            data-quiz-title="{{ quiz.title }}" 
+                                                            onclick="setQuizForQuestion(this)">
+                                                        <i class="bi bi-plus-circle me-1"></i>Add Q
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-light text-center py-4 mb-0">No quizzes created yet.</div>
+                                {% endif %}
+                            </div>
+                            <!-- Assignments Tab -->
+                            <div class="tab-pane fade" id="pills-assignments" role="tabpanel">
+                                {% if assignments %}
+                                <div class="table-responsive">
+                                    <table class="table align-middle table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Subject</th>
+                                                <th>Max Marks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for assign in assignments %}
+                                            <tr>
+                                                <td class="fw-semibold">{{ assign.title }}</td>
+                                                <td><code>{{ assign.subject.code }}</code></td>
+                                                <td>{{ assign.max_marks }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-light text-center py-4 mb-0">No assignments posted yet.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- Grading Queue section -->
+            <section id="evaluations">
+                <div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
+                    <h5 class="fw-bold mb-4 text-warning"><i class="bi bi-file-earmark-check me-2"></i>Evaluate Student Submissions</h5>
+                     
+                    {% if pending_submissions %}
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student (ID)</th>
+                                    <th>Assignment</th>
+                                    <th>File</th>
+                                    <th>Submitted Date</th>
+                                    <th style="width: 320px;">Grade & Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in pending_submissions %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">{{ sub.student.user.first_name }} {{ sub.student.user.last_name }}</div>
+                                        <small class="text-muted">{{ sub.student.student_id }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ sub.assignment.title }}</div>
+                                        <small class="text-muted">Max: {{ sub.assignment.max_marks }} Marks</small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ sub.file.url }}" class="btn btn-outline-secondary btn-sm px-3 rounded" target="_blank">
+                                            <i class="bi bi-file-earmark-arrow-down me-1"></i>Download
+                                        </a>
+                                    </td>
+                                    <td>{{ sub.submitted_at|date:"d M, Y (H:i)" }}</td>
+                                    <td>
+                                        <!-- Inline Grading Form -->
+                                        <form method="POST" action="{% url 'grade_submission' sub.id %}" class="d-flex flex-column gap-2 p-2 bg-light rounded shadow-xs">
+                                            {% csrf_token %}
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-white border-end-0">Marks:</span>
+                                                <input type="number" step="0.1" name="marks" class="form-control bg-white border-start-0" max="{{ sub.assignment.max_marks }}" placeholder="/{{ sub.assignment.max_marks }}" required>
+                                            </div>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="feedback" class="form-control bg-white" placeholder="Provide feedback comments...">
+                                                <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-send-fill text-white"></i></button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-light text-center py-4 mb-0">No submissions pending review. All student uploads have been evaluated.</div>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- Add Assignment Modal -->
+<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="addAssignmentModalLabel"><i class="bi bi-file-earmark-plus me-2"></i>Create New Assignment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'add_assignment' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Midterm Programming Assignment" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Assignment prompt details, instructions..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject</label>
+                        <select name="subject" class="form-select" required>
+                            <option value="" disabled selected>Select Subject</option>
+                            {% for sub in subjects %}
+                            <option value="{{ sub.id }}">{{ sub.name }} ({{ sub.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Max Marks</label>
+                                <input type="number" name="max_marks" class="form-control" value="100" min="1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Deadline</label>
+                                <input type="datetime-local" name="deadline" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Attachment File (Optional)</label>
+                        <input type="file" name="file" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info text-white"><i class="bi bi-save me-1"></i>Create Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Quiz Modal -->
+<div class="modal fade" id="addQuizModal" tabindex="-1" aria-labelledby="addQuizModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="addQuizModalLabel"><i class="bi bi-cpu me-2"></i>Create New MCQ Quiz</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'add_quiz' %}">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Quiz Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Python Loops and Functions Quiz" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Quiz instructions or summary..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject</label>
+                        <select name="subject" class="form-select" required>
+                            <option value="" disabled selected>Select Subject</option>
+                            {% for sub in subjects %}
+                            <option value="{{ sub.id }}">{{ sub.name }} ({{ sub.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Duration (Minutes)</label>
+                        <input type="number" name="duration_minutes" class="form-control" value="30" min="1" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Start Time</label>
+                                <input type="datetime-local" name="start_time" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">End Time</label>
+                                <input type="datetime-local" name="end_time" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info text-white"><i class="bi bi-save me-1"></i>Create Quiz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold" id="addQuestionModalLabel"><i class="bi bi-patch-question me-2"></i>Add Question to: <span id="questionModalQuizTitle" class="text-white-50"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="addQuestionForm" action="">
+                {% csrf_token %}
+                <input type="hidden" id="questionModalQuizId" name="quiz_id">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Question Text</label>
+                        <textarea name="text" class="form-control" rows="3" placeholder="Type the question content here..." required></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Option A</label>
+                            <input type="text" name="option_a" class="form-control" placeholder="Answer option A" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Option B</label>
+                            <input type="text" name="option_b" class="form-control" placeholder="Answer option B" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Option C</label>
+                            <input type="text" name="option_c" class="form-control" placeholder="Answer option C" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Option D</label>
+                            <input type="text" name="option_d" class="form-control" placeholder="Answer option D" required>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Correct Option</label>
+                                <select name="correct_option" class="form-select" required>
+                                    <option value="" disabled selected>Select Option</option>
+                                    <option value="A">Option A</option>
+                                    <option value="B">Option B</option>
+                                    <option value="C">Option C</option>
+                                    <option value="D">Option D</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Question Marks</label>
+                                <input type="number" name="marks" class="form-control" value="1" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info text-white"><i class="bi bi-plus-circle me-1"></i>Add Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setQuizForQuestion(button) {
+        const quizId = button.getAttribute('data-quiz-id');
+        const quizTitle = button.getAttribute('data-quiz-title');
+        document.getElementById('questionModalQuizId').value = quizId;
+        document.getElementById('questionModalQuizTitle').innerText = quizTitle;
+        document.getElementById('addQuestionForm').setAttribute('action', `/dashboard/faculty/quiz/${quizId}/add-question/`);
+    }
+</script>
+{% endblock %}

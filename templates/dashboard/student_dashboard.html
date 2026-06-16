@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - College ERP{% endblock %}
+
+{% block extra_css %}
+    body {
+        background-color: #f8fafc;
+    }
+    .dashboard-container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+    .sidebar {
+        width: var(--sidebar-width);
+        background-color: var(--secondary-color);
+        color: white;
+        flex-shrink: 0;
+        z-index: 100;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    .sidebar .nav-link {
+        color: #94a3b8;
+        padding: 0.8rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .sidebar .nav-link.active {
+        border-left: 4px solid var(--primary-color);
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    .main-workspace {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        height: 100vh;
+        overflow: hidden;
+    }
+    .main-content {
+        flex-grow: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+    .nav-header {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+    .card-grad-stu {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        color: white;
+    }
+    .code-editor {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        background-color: #0f172a;
+        color: #38bdf8;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 250px;
+        width: 100%;
+        resize: vertical;
+    }
+    .compiler-output {
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #020617;
+        color: #f1f5f9;
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 120px;
+    }
+    .quiz-question-card {
+        display: none;
+    }
+    .quiz-question-card.active {
+        display: block;
+    }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-md-block">
+        <div class="p-4 border-bottom border-secondary">
+            <h4 class="fw-bold mb-0 text-white"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span>ERP</span></h4>
+            <span class="badge bg-success mt-2">Student Portal</span>
+        </div>
+        <div class="nav flex-column py-3" id="dashboard-tabs" role="tablist">
+            <button class="nav-link active border-0 text-start bg-transparent" id="tab-overview-btn" data-bs-toggle="pill" data-bs-target="#tab-overview" type="button" role="tab"><i class="bi bi-grid-fill"></i> Overview</button>
+            <button class="nav-link border-0 text-start bg-transparent" id="tab-mcq-btn" data-bs-toggle="pill" data-bs-target="#tab-mcq" type="button" role="tab" onclick="loadQuizzes()"><i class="bi bi-cpu"></i> MCQ Quiz Arena</button>
+            <button class="nav-link border-0 text-start bg-transparent" id="tab-coding-btn" data-bs-toggle="pill" data-bs-target="#tab-coding" type="button" role="tab" onclick="loadCodingProblems()"><i class="bi bi-code-slash"></i> Coding Practice</button>
+            <button class="nav-link border-0 text-start bg-transparent" id="tab-academics-btn" data-bs-toggle="pill" data-bs-target="#tab-academics" type="button" role="tab"><i class="bi bi-mortarboard"></i> Transcript & Grades</button>
+            <a class="nav-link mt-2" href="{% url 'student_schedule' %}"><i class="bi bi-calendar3"></i> Class Schedule</a>
+            <a class="nav-link" href="{% url 'student_attendance' %}"><i class="bi bi-calendar-check"></i> Attendance</a>
+            <a class="nav-link" href="{% url 'student_marks' %}"><i class="bi bi-award"></i> Marks & Results</a>
+            <a class="nav-link" href="{% url 'student_exams' %}"><i class="bi bi-journal-text"></i> Write Exams</a>
+            <a class="nav-link mt-4" href="{% url 'home' %}"><i class="bi bi-house-door"></i> View Homepage</a>
+            <a class="nav-link text-danger mt-2" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="main-workspace w-100">
+        <!-- Top Header -->
+        <header class="nav-header">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-people me-2 text-primary"></i>Student Workstation</h5>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 600;">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                    <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><a class="dropdown-item py-2" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left me-2 text-danger"></i>Logout</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Main Body Content -->
+        <main class="main-content">
+            <div class="tab-content" id="nav-tabContent">
+                
+                <!-- TAB 1: OVERVIEW -->
+                <div class="tab-pane fade show active" id="tab-overview" role="tabpanel">
+                    <!-- Welcome profile details -->
+                    <div class="card border-0 shadow-sm p-4 rounded-3 mb-4 bg-white">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                                <div class="bg-light text-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                                    <i class="bi bi-mortarboard fs-1 text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <h4 class="fw-bold mb-1">Welcome, {{ request.user.first_name }} {{ request.user.last_name }}!</h4>
+                                <p class="text-muted mb-0 small">
+                                    <strong>Student ID:</strong> {{ profile.student_id }} | 
+                                    <strong>Course:</strong> {{ profile.course.name|default:"Not Enrolled" }} | 
+                                    <strong>Semester:</strong> {{ profile.semester }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Statistics Row -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-card card-grad-stu p-4 shadow-sm h-100">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 text-uppercase small fw-bold">Overall Attendance</h6>
+                                        <h2 class="fw-extrabold mb-0">{{ overall_attendance }}%</h2>
+                                    </div>
+                                    <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-card card-grad-stu p-4 shadow-sm bg-gradient h-100" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 text-uppercase small fw-bold">Assignments Pending</h6>
+                                        <h2 class="fw-extrabold mb-0">{{ pending_assignments.count }}</h2>
+                                    </div>
+                                    <i class="bi bi-file-earmark-code fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-card card-grad-stu p-4 shadow-sm bg-gradient h-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 text-uppercase small fw-bold">Active Courses</h6>
+                                        <h2 class="fw-extrabold mb-0">{{ subjects.count }}</h2>
+                                    </div>
+                                    <i class="bi bi-book fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card stat-card card-grad-stu p-4 shadow-sm bg-gradient h-100" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 text-uppercase small fw-bold">Quizzes Attempted</h6>
+                                        <h2 class="fw-extrabold mb-0">{{ completed_quizzes_count }}</h2>
+                                    </div>
+                                    <i class="bi bi-patch-check fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance & Assignments -->
+                    <div class="row g-4">
+                        <!-- Subject-wise Attendance -->
+                        <div class="col-lg-6">
+                            <div class="card border-0 shadow-sm p-4 h-100 rounded-3 bg-white">
+                                <h5 class="fw-bold mb-4"><i class="bi bi-calendar3 me-2 text-primary"></i>Subject Attendance Tracker</h5>
+                                {% if attendance_data %}
+                                    {% for item in attendance_data %}
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="fw-semibold small">{{ item.subject.name }} (<code>{{ item.subject.code }}</code>)</span>
+                                            <span class="small fw-bold {% if item.percentage < 75 %}text-danger{% else %}text-success{% endif %}">{{ item.percentage }}%</span>
+                                        </div>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar {% if item.percentage < 75 %}bg-danger{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ item.percentage }}%;" aria-valuenow="{{ item.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="form-text small text-muted text-end">{{ item.present }}/{{ item.total }} classes attended</div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="alert alert-light text-center py-5 mb-0">No attendance logging registered yet.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Assignment Upload Portal -->
+                        <div class="col-lg-6">
+                            <div class="card border-0 shadow-sm p-4 h-100 rounded-3 bg-white">
+                                <h5 class="fw-bold mb-4"><i class="bi bi-file-earmark-arrow-up me-2 text-primary"></i>Pending Coursework Tasks</h5>
+                                
+                                {% if pending_assignments %}
+                                    <div class="list-group list-group-flush">
+                                        {% for assign in pending_assignments %}
+                                        <div class="list-group-item py-3 px-0 bg-transparent border-bottom">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">{{ assign.title }}</h6>
+                                                    <span class="badge bg-light text-secondary">Code: {{ assign.subject.code }}</span>
+                                                    <span class="badge bg-light text-danger">Due: {{ assign.deadline|date:"d M, Y" }}</span>
+                                                </div>
+                                                <span class="badge bg-primary">{{ assign.max_marks }} Marks</span>
+                                            </div>
+                                            <p class="text-muted small mb-3">{{ assign.description }}</p>
+                                            
+                                            <!-- File Upload Form -->
+                                            <form method="POST" action="{% url 'submit_assignment' assign.id %}" enctype="multipart/form-data" class="d-flex gap-2">
+                                                {% csrf_token %}
+                                                <input type="file" name="submission_file" class="form-control form-control-sm" required>
+                                                <button type="submit" class="btn btn-primary btn-sm px-3"><i class="bi bi-upload"></i> Upload</button>
+                                            </form>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-light text-center py-5 mb-0"><i class="bi bi-patch-check text-success fs-1 mb-2 d-block"></i>No pending assignments! All caught up.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: MCQ QUIZ ARENA -->
+                <div class="tab-pane fade" id="tab-mcq" role="tabpanel">
+                    <div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
+                        <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-cpu me-2"></i>MCQ Arena</h5>
+                        <div class="row g-4" id="quiz-list-container">
+                            <!-- Quizzes will be loaded here via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Wizard Modal -->
+                    <div class="modal fade" id="quizModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title fw-bold" id="quizModalLabel">Quiz Arena Wizard</h5>
+                                    <div class="badge bg-danger ms-auto px-3 py-2" id="quiz-timer">Timer: 00:00</div>
+                                </div>
+                                <div class="modal-body p-4" id="quiz-wizard-body">
+                                    <!-- Dynamic slides of quiz questions -->
+                                </div>
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-outline-secondary" id="quiz-prev-btn" onclick="prevQuestion()">Previous</button>
+                                    <button type="button" class="btn btn-primary" id="quiz-next-btn" onclick="nextQuestion()">Next</button>
+                                    <button type="button" class="btn btn-success d-none" id="quiz-submit-btn" onclick="submitQuizData()">Submit Quiz</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: CODING PRACTICE -->
+                <div class="tab-pane fade" id="tab-coding" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm p-4 rounded-3 bg-white h-100">
+                                <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-terminal me-2"></i>Coding Challenges</h5>
+                                <div class="list-group list-group-flush" id="problem-list-container">
+                                    <!-- Problems loaded via JS -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm p-4 rounded-3 bg-white h-100 d-none" id="code-workspace-card">
+                                <h5 class="fw-bold mb-2 text-primary" id="workspace-title">Code Workspace</h5>
+                                <p class="text-muted small mb-3" id="workspace-description">Problem details...</p>
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded small"><strong>Input Format:</strong> <span id="ws-input-fmt"></span></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded small"><strong>Output Format:</strong> <span id="ws-output-fmt"></span></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded small"><strong>Sample Input:</strong> <pre class="mb-0 mt-1"><code><span id="ws-sample-in"></span></code></pre></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded small"><strong>Sample Output:</strong> <pre class="mb-0 mt-1"><code><span id="ws-sample-out"></span></code></pre></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Write Python Code:</label>
+                                    <textarea class="code-editor" id="code-textarea" placeholder="# Enter Python code here..."></textarea>
+                                </div>
+
+                                <div class="d-flex gap-2 mb-3">
+                                    <button class="btn btn-primary px-4 py-2" id="submit-code-btn" onclick="submitCode()"><i class="bi bi-play-fill"></i> Run & Judge</button>
+                                </div>
+
+                                <label class="form-label small fw-semibold">Compiler Console Output:</label>
+                                <div class="compiler-output" id="console-output">Terminal is idle...</div>
+                            </div>
+                            
+                            <div class="card border-0 shadow-sm p-4 rounded-3 bg-white h-100 d-flex align-items-center justify-content-center text-center" id="workspace-placeholder">
+                                <div>
+                                    <i class="bi bi-code-slash display-1 text-muted mb-3 d-block"></i>
+                                    <h5>Select a Coding Challenge</h5>
+                                    <p class="text-muted small">Choose a problem from the left pane to begin typing code.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: ACADEMICS & RESULTS -->
+                <div class="tab-pane fade" id="tab-academics" role="tabpanel">
+                    <div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
+                        <h5 class="fw-bold mb-4 text-primary"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Academic Marksheet Transcript</h5>
+                        {% if results %}
+                        <div class="table-responsive">
+                            <table class="table align-middle table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Exam Name</th>
+                                        <th>Subject</th>
+                                        <th>Marks Obtained</th>
+                                        <th>Max Marks</th>
+                                        <th>Grade</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for res in results %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ res.exam_schedule.name }}</td>
+                                        <td><code>{{ res.exam_schedule.subject.code }}</code> - {{ res.exam_schedule.subject.name }}</td>
+                                        <td class="fw-bold text-primary">{{ res.marks_obtained }}</td>
+                                        <td>{{ res.exam_schedule.max_marks }}</td>
+                                        <td><span class="badge bg-secondary px-3 py-2">{{ res.grade }}</span></td>
+                                        <td><em class="text-muted">{{ res.remarks }}</em></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-light text-center py-5 mb-0">No exam results published yet for this semester.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Helper to get CSRF cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // -------------------------------------------------------------
+    // MCQ Quiz Arena Javascript Engine
+    // -------------------------------------------------------------
+    let activeQuizId = null;
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let quizTimerInterval = null;
+    let quizAnswers = {};
+
+    function loadQuizzes() {
+        fetch('/api/quizzes/')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('quiz-list-container');
+                container.innerHTML = '';
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(quiz => {
+                        container.innerHTML += `
+                            <div class="col-md-6">
+                                <div class="card border border-light shadow-xs p-4 h-100 rounded-3">
+                                    <h5 class="fw-bold mb-1">${quiz.title}</h5>
+                                    <p class="text-muted small">${quiz.description}</p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-light text-secondary">Subject: ${quiz.subject_name}</span>
+                                        <span class="badge bg-light text-secondary">Duration: ${quiz.duration_minutes} Mins</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm px-4 rounded-pill mt-auto" onclick="startQuiz(${quiz.id}, ${quiz.duration_minutes})">
+                                        <i class="bi bi-play-fill"></i> Take Quiz
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<div class="alert alert-light text-center py-4 w-100">No active quizzes found in MCQ Arena.</div>';
+                }
+            });
+    }
+
+    function startQuiz(quizId, duration) {
+        activeQuizId = quizId;
+        quizAnswers = {};
+        currentQuestionIndex = 0;
+        
+        fetch(`/api/quizzes/${quizId}/`)
+            .then(res => res.json())
+            .then(quiz => {
+                quizQuestions = quiz.questions;
+                if (!quizQuestions || quizQuestions.length === 0) {
+                    alert('This quiz does not contain any questions.');
+                    return;
+                }
+                
+                // Render questions inside wizard
+                const body = document.getElementById('quiz-wizard-body');
+                body.innerHTML = '';
+                
+                quizQuestions.forEach((q, idx) => {
+                    body.innerHTML += `
+                        <div class="quiz-question-card ${idx === 0 ? 'active' : ''}" id="q-card-${idx}">
+                            <h6 class="fw-bold text-muted mb-3">Question ${idx + 1} of ${quizQuestions.length}</h6>
+                            <h5 class="fw-bold mb-4">${q.text}</h5>
+                            <div class="d-flex flex-column gap-2">
+                                <label class="btn btn-outline-secondary text-start p-3 rounded-3" onclick="selectQuizAnswer(${q.id}, 'A')">
+                                    <input type="radio" name="q-${q.id}" value="A" class="d-none"> A. ${q.option_a}
+                                </label>
+                                <label class="btn btn-outline-secondary text-start p-3 rounded-3" onclick="selectQuizAnswer(${q.id}, 'B')">
+                                    <input type="radio" name="q-${q.id}" value="B" class="d-none"> B. ${q.option_b}
+                                </label>
+                                <label class="btn btn-outline-secondary text-start p-3 rounded-3" onclick="selectQuizAnswer(${q.id}, 'C')">
+                                    <input type="radio" name="q-${q.id}" value="C" class="d-none"> C. ${q.option_c}
+                                </label>
+                                <label class="btn btn-outline-secondary text-start p-3 rounded-3" onclick="selectQuizAnswer(${q.id}, 'D')">
+                                    <input type="radio" name="q-${q.id}" value="D" class="d-none"> D. ${q.option_d}
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Open modal
+                const modal = new bootstrap.Modal(document.getElementById('quizModal'));
+                modal.show();
+                
+                // Start countdown timer
+                let totalSeconds = duration * 60;
+                clearInterval(quizTimerInterval);
+                quizTimerInterval = setInterval(() => {
+                    let mins = Math.floor(totalSeconds / 60);
+                    let secs = totalSeconds % 60;
+                    document.getElementById('quiz-timer').innerText = `Timer: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    
+                    if (totalSeconds <= 0) {
+                        clearInterval(quizTimerInterval);
+                        alert("Time's up! Automatically submitting quiz.");
+                        submitQuizData();
+                    }
+                    totalSeconds--;
+                }, 1000);
+                
+                updateWizardNav();
+            });
+    }
+
+    function selectQuizAnswer(questionId, option) {
+        quizAnswers[questionId] = option;
+        // Highlight active button selection
+        const radioGroup = document.getElementsByName(`q-${questionId}`);
+        radioGroup.forEach(radio => {
+            const label = radio.closest('label');
+            if (radio.value === option) {
+                label.classList.remove('btn-outline-secondary');
+                label.classList.add('btn-primary', 'text-white');
+            } else {
+                label.classList.add('btn-outline-secondary');
+                label.classList.remove('btn-primary', 'text-white');
+            }
+        });
+    }
+
+    function updateWizardNav() {
+        document.getElementById('quiz-prev-btn').disabled = (currentQuestionIndex === 0);
+        
+        if (currentQuestionIndex === quizQuestions.length - 1) {
+            document.getElementById('quiz-next-btn').classList.add('d-none');
+            document.getElementById('quiz-submit-btn').classList.remove('d-none');
+        } else {
+            document.getElementById('quiz-next-btn').classList.remove('d-none');
+            document.getElementById('quiz-submit-btn').classList.add('d-none');
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizQuestions.length - 1) {
+            document.getElementById(`q-card-${currentQuestionIndex}`).classList.remove('active');
+            currentQuestionIndex++;
+            document.getElementById(`q-card-${currentQuestionIndex}`).classList.add('active');
+            updateWizardNav();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            document.getElementById(`q-card-${currentQuestionIndex}`).classList.remove('active');
+            currentQuestionIndex--;
+            document.getElementById(`q-card-${currentQuestionIndex}`).classList.add('active');
+            updateWizardNav();
+        }
+    }
+
+    function submitQuizData() {
+        clearInterval(quizTimerInterval);
+        
+        fetch(`/api/quizzes/${activeQuizId}/submit_quiz/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ answers: quizAnswers })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                alert(`Quiz submitted successfully! Score: ${res.score}/${res.total_possible}`);
+                location.reload();
+            } else {
+                alert(`Error submitting quiz: ${res.error || 'Unknown error'}`);
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
+    // Coding Practice Javascript Engine
+    // -------------------------------------------------------------
+    let activeProblemId = null;
+
+    function loadCodingProblems() {
+        fetch('/api/coding-problems/')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('problem-list-container');
+                container.innerHTML = '';
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(prob => {
+                        let badgeColor = 'bg-success';
+                        if (prob.difficulty === 'Medium') badgeColor = 'bg-warning text-dark';
+                        if (prob.difficulty === 'Hard') badgeColor = 'bg-danger';
+                        
+                        container.innerHTML += `
+                            <button class="list-group-item list-group-item-action py-3 border-bottom d-flex justify-content-between align-items-center bg-transparent text-start" onclick="selectProblem(${prob.id})">
+                                <div>
+                                    <h6 class="fw-bold mb-1">${prob.title}</h6>
+                                    <span class="badge ${badgeColor}">${prob.difficulty}</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted"></i>
+                            </button>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<div class="alert alert-light text-center py-4 w-100">No coding problems configured.</div>';
+                }
+            });
+    }
+
+    function selectProblem(id) {
+        activeProblemId = id;
+        fetch(`/api/coding-problems/${id}/`)
+            .then(res => res.json())
+            .then(prob => {
+                document.getElementById('workspace-title').innerText = prob.title;
+                document.getElementById('workspace-description').innerHTML = prob.description;
+                document.getElementById('ws-input-fmt').innerText = prob.input_format;
+                document.getElementById('ws-output-fmt').innerText = prob.output_format;
+                document.getElementById('ws-sample-in').innerText = prob.sample_input;
+                document.getElementById('ws-sample-out').innerText = prob.sample_output;
+                
+                // Show editor, hide placeholder
+                document.getElementById('code-workspace-card').classList.remove('d-none');
+                document.getElementById('workspace-placeholder').classList.add('d-none');
+                
+                // Put boilerplate python code template
+                document.getElementById('code-textarea').value = `# Python 3\n# Read input if needed, output matches exact sample format.\n\n`;
+                document.getElementById('console-output').innerText = 'Terminal is ready. Input your code and press Run.';
+                document.getElementById('console-output').className = 'compiler-output';
+            });
+    }
+
+    function submitCode() {
+        if (!activeProblemId) return;
+        
+        const codeText = document.getElementById('code-textarea').value;
+        const consoleOut = document.getElementById('console-output');
+        
+        consoleOut.innerText = 'Compiling and executing code against hidden test cases...';
+        consoleOut.className = 'compiler-output text-warning';
+        
+        fetch('/api/coding-submissions/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                problem: activeProblemId,
+                code: codeText,
+                language: 'python'
+            })
+        })
+        .then(res => res.json())
+        .then(submission => {
+            if (submission.status === 'Accepted') {
+                consoleOut.innerHTML = `🏁 <strong>Status: ACCEPTED</strong><br>🚀 Code ran successfully against all test cases!<br>⏱️ Max Runtime: ${submission.runtime_ms}ms`;
+                consoleOut.className = 'compiler-output text-success';
+            } else if (submission.status === 'Wrong Answer') {
+                consoleOut.innerHTML = `❌ <strong>Status: WRONG ANSWER</strong><br>Code logic output did not match expected test output. Try checking edge cases!`;
+                consoleOut.className = 'compiler-output text-danger';
+            } else if (submission.status === 'Runtime Error') {
+                consoleOut.innerHTML = `⚠️ <strong>Status: RUNTIME ERROR</strong><br>Your script threw an unhandled exception or exit code error during execution.`;
+                consoleOut.className = 'compiler-output text-danger';
+            } else if (submission.status === 'Time Limit Exceeded') {
+                consoleOut.innerHTML = `⏰ <strong>Status: TIME LIMIT EXCEEDED</strong><br>Code execution timed out. Optimize loops!`;
+                consoleOut.className = 'compiler-output text-danger';
+            } else {
+                consoleOut.innerHTML = `Status: ${submission.status}`;
+                consoleOut.className = 'compiler-output';
+            }
+        })
+        .catch(err => {
+            consoleOut.innerText = `Error: ${err}`;
+            consoleOut.className = 'compiler-output text-danger';
+        });
+    }
+</script>
+{% endblock %}

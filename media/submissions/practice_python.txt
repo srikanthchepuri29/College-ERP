@@ -1,0 +1,76 @@
+POLYMORPHISM :-
+
+class ironbox:
+    def press(self):
+        print(" pressing the ironbox")
+class cotton_clothes(ironbox):
+    def press(self):
+        print("high tempereture for cotton clothes")
+class silk_clothes(ironbox):
+    def press(self):
+        print("low tempereture for silk clothes")
+        
+b1 = cotton_clothes()
+b2 = silk_clothes()
+b1.press()
+b2.press()
+
+
+
+INHERITANCE :-
+
+
+class vehicle:
+    def start(self):
+        print("vehicle is start")
+class car(vehicle):
+    def drive(self):
+        print("car is moving")
+c = car()
+c.start()
+c.drive()
+
+
+
+ABSTRACTION :-
+
+class vehicle:
+    def start(self):
+        print("vehicle is start")
+class car(vehicle):
+    def drive(self):
+        print("car is moving")
+c = car()
+c.start()
+c.drive()
+
+
+MARKS PERCENTAGES :-
+
+s1 = int(input("enter marks for subject1(out of 100)"))
+s2 = int(input("enter marks for subject1(out of 100)"))
+s3 = int(input("enter marks for subject1(out of 100)"))
+s4 = int(input("enter marks for subject1(out of 100)"))
+s5 = int(input("enter marks for subject1(out of 100)"))
+
+total_marks = s1+s2+s3+s4+s5
+max_total_marks = 500
+percentage = (total_marks / max_total_marks) * 100
+
+print(f"\n total_marks:{total_marks}")
+print(f"percentage:{percentage:.2f}")
+
+FIZZBUZZ :-
+
+n = int(input("enter a num"))
+for i in range(1,n):
+    if i % 15 == 0:
+        print("FizzBuzz")
+    elif i % 3 == 0:
+        print("Fizz")
+    elif i % 5 == 0:
+        print("Buzz")
+    else:
+        print(i)    
+            
+print(n)

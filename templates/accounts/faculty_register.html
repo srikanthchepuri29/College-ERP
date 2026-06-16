@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Registration - College ERP{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            
+            <div class="text-center mb-4">
+                <a href="{% url 'home' %}" class="navbar-brand fs-3 text-decoration-none">
+                    <i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span>ERP</span>
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="bg-dark p-4 text-white text-center">
+                    <h4 class="mb-1 text-info"><i class="bi bi-person-badge me-2"></i>Faculty Registration</h4>
+                    <p class="mb-0 small text-light opacity-75">Register as an academic instructor</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Section 1: Credentials -->
+                        <h5 class="fw-bold mb-3 text-info border-bottom pb-2"><i class="bi bi-key me-2"></i>Account Credentials</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label small fw-semibold">Username</label>
+                                <input type="text" name="username" id="username" class="form-control bg-light" placeholder="e.g. prof_john" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label small fw-semibold">Email address</label>
+                                <input type="email" name="email" id="email" class="form-control bg-light" placeholder="john.doe@college.edu" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label small fw-semibold">First Name</label>
+                                <input type="text" name="first_name" id="first_name" class="form-control bg-light" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label small fw-semibold">Last Name</label>
+                                <input type="text" name="last_name" id="last_name" class="form-control bg-light" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="password" class="form-label small fw-semibold">Password</label>
+                                <input type="password" name="password" id="password" class="form-control bg-light" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Department & Designation -->
+                        <h5 class="fw-bold mb-3 text-info border-bottom pb-2"><i class="bi bi-briefcase me-2"></i>Departmental Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="faculty_id" class="form-label small fw-semibold">Faculty ID</label>
+                                <input type="text" name="faculty_id" id="faculty_id" class="form-control bg-light" placeholder="FAC-2026-04" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="department" class="form-label small fw-semibold">Department</label>
+                                <select name="department" id="department" class="form-select bg-light" required>
+                                    <option value="" disabled selected>Select Department</option>
+                                    {% for dept in departments %}
+                                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                    {% empty %}
+                                        <option value="" disabled>No departments configured</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="designation" class="form-label small fw-semibold">Designation</label>
+                                <input type="text" name="designation" id="designation" class="form-control bg-light" placeholder="e.g. Assistant Professor" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone_number" class="form-label small fw-semibold">Phone Number</label>
+                                <input type="text" name="phone_number" id="phone_number" class="form-control bg-light" placeholder="+1 (555) 000-0000">
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Qualifications -->
+                        <h5 class="fw-bold mb-3 text-info border-bottom pb-2"><i class="bi bi-mortarboard me-2"></i>Qualifications</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label for="qualification" class="form-label small fw-semibold">Qualifications & Degree details</label>
+                                <input type="text" name="qualification" id="qualification" class="form-control bg-light" placeholder="e.g. Ph.D. in Computer Science, M.Tech">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 py-3 mb-3 shadow-sm border-0" style="background-color: var(--secondary-color);">
+                            <i class="bi bi-check-circle me-1 text-info"></i> Register Account
+                        </button>
+                    </form>
+                    
+                    <div class="text-center">
+                        <span class="text-muted small">Already have an account?</span>
+                        <a href="{% url 'faculty_login' %}" class="text-info small fw-semibold text-decoration-none ms-1">Log in here</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Return Home</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

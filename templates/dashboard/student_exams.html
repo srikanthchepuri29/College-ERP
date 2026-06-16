@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Write Exams - Student - College ERP{% endblock %}
+
+{% block extra_css %}
+    body {
+        background-color: #f8fafc;
+    }
+    .dashboard-container {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+    .sidebar {
+        width: var(--sidebar-width);
+        background-color: var(--secondary-color);
+        color: white;
+        flex-shrink: 0;
+        z-index: 100;
+        height: 100vh;
+        overflow-y: auto;
+    }
+    .sidebar .nav-link {
+        color: #94a3b8;
+        padding: 0.8rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .sidebar .nav-link.active {
+        border-left: 4px solid var(--primary-color);
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    .main-workspace {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        height: 100vh;
+        overflow: hidden;
+    }
+    .main-content {
+        flex-grow: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+    .nav-header {
+        background: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .exam-textarea {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        width: 100%;
+        min-height: 300px;
+        resize: vertical;
+    }
+    .exam-textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-md-block">
+        <div class="p-4 border-bottom border-secondary">
+            <h4 class="fw-bold mb-0 text-white"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span>ERP</span></h4>
+            <span class="badge bg-success mt-2">Student Portal</span>
+        </div>
+        <div class="nav flex-column py-3" id="dashboard-tabs">
+            <a class="nav-link" href="{% url 'student_dashboard' %}"><i class="bi bi-grid-fill"></i> Overview Dashboard</a>
+            <a class="nav-link" href="{% url 'student_schedule' %}"><i class="bi bi-calendar3"></i> Class Schedule</a>
+            <a class="nav-link" href="{% url 'student_attendance' %}"><i class="bi bi-calendar-check"></i> Attendance</a>
+            <a class="nav-link" href="{% url 'student_marks' %}"><i class="bi bi-award"></i> Marks & Results</a>
+            <a class="nav-link active" href="{% url 'student_exams' %}"><i class="bi bi-journal-text"></i> Write Exams</a>
+            <a class="nav-link mt-4" href="{% url 'home' %}"><i class="bi bi-house-door"></i> View Homepage</a>
+            <a class="nav-link text-danger mt-2" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left"></i> Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="main-workspace w-100">
+        <!-- Top Nav Header -->
+        <header class="nav-header">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-journal-text me-2 text-primary"></i>Online Exam Center</h5>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-weight: 600;">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </div>
+                    <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li><a class="dropdown-item py-2" href="{% url 'logout' %}"><i class="bi bi-box-arrow-left me-2 text-danger"></i>Logout</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <!-- Main Body Content -->
+        <main class="main-content">
+            <div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
+                <h5 class="fw-bold mb-4"><i class="bi bi-clock-history me-2 text-primary"></i>Active & Scheduled Exams</h5>
+
+                {% if exams_data %}
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Exam Name</th>
+                                <th>Subject</th>
+                                <th>Type</th>
+                                <th>Exam Date</th>
+                                <th>Max Marks</th>
+                                <th class="text-end" style="width: 200px;">Status / Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in exams_data %}
+                            <tr>
+                                <td><span class="fw-semibold">{{ item.exam.name }}</span></td>
+                                <td><code>{{ item.exam.subject.code }}</code> - {{ item.exam.subject.name }}</td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary">{{ item.exam.get_exam_type_display }}</span>
+                                </td>
+                                <td>{{ item.exam.date|date:"d M, Y" }}</td>
+                                <td>{{ item.exam.max_marks }} Marks</td>
+                                <td class="text-end">
+                                    {% if item.is_graded %}
+                                        <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i>Graded: {{ item.result.marks_obtained }}/{{ item.exam.max_marks }}</span>
+                                    {% elif item.is_submitted %}
+                                        <span class="badge bg-info text-white px-3 py-2"><i class="bi bi-hourglass-split me-1"></i>Answers Submitted</span>
+                                    {% else %}
+                                        <button class="btn btn-primary btn-sm px-3 rounded-pill" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#writeExamModal" 
+                                                data-exam-id="{{ item.exam.id }}" 
+                                                data-exam-name="{{ item.exam.name }}" 
+                                                onclick="setExamForSubmission(this)">
+                                            <i class="bi bi-pencil-square me-1"></i>Write Exam
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-light text-center py-5 mb-0">No exams scheduled for your enrolled courses/semester yet.</div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Write Exam Modal -->
+<div class="modal fade" id="writeExamModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="writeExamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="writeExamModalLabel">Write Exam</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" id="writeExamForm" action="">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="alert alert-warning border-0 small mb-4">
+                        <h6 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>Important Exam Instructions:</h6>
+                        <ul class="mb-0 ps-3">
+                            <li>Please write or paste your complete solutions/responses in the text area below.</li>
+                            <li>Do not close or reload this window until you submit, or you may lose your typed answers.</li>
+                            <li>Ensure that you review all answers thoroughly. You cannot edit your submission once uploaded.</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Your Solutions / Written Responses:</label>
+                        <textarea name="answers" class="exam-textarea" placeholder="Type your exam answers here..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel / Go Back</button>
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to finalize and submit your exam answers? This action cannot be undone.');">
+                        <i class="bi bi-send-check me-1"></i>Submit Exam
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setExamForSubmission(button) {
+        const examId = button.getAttribute('data-exam-id');
+        const examName = button.getAttribute('data-exam-name');
+        document.getElementById('writeExamModalLabel').innerText = `Write Exam: ${examName}`;
+        document.getElementById('writeExamForm').setAttribute('action', `/dashboard/student/exams/submit/${examId}/`);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Login - College ERP{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh; py-5;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-8 col-lg-5 col-xl-4">
+            
+            <div class="text-center mb-4">
+                <a href="{% url 'home' %}" class="navbar-brand fs-3 text-decoration-none">
+                    <i class="bi bi-mortarboard-fill me-2 text-primary"></i>College<span>ERP</span>
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="bg-dark p-4 text-white text-center">
+                    <h4 class="mb-1"><i class="bi bi-person-badge me-2 text-info"></i>Faculty Portal</h4>
+                    <p class="mb-0 small text-light opacity-75">Sign in to access your dashboard</p>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label small fw-semibold">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                <input type="text" name="username" id="username" class="form-control bg-light border-start-0" placeholder="faculty_name" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label small fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                                <input type="password" name="password" id="password" class="form-control bg-light border-start-0" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 py-3 mb-3 shadow-sm border-0" style="background-color: var(--secondary-color);">
+                            <i class="bi bi-box-arrow-in-right me-1 text-info"></i> Log In
+                        </button>
+                    </form>
+                    
+                    <div class="text-center">
+                        <span class="text-muted small">New faculty?</span>
+                        <a href="{% url 'faculty_register' %}" class="text-info small fw-semibold text-decoration-none ms-1">Create an account</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'home' %}" class="text-muted small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Return Home</a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

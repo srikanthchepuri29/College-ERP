@@ -39,6 +39,9 @@ def admin_dashboard(request):
     present_records = AttendanceRecord.objects.filter(status='PRESENT').count()
     attendance_rate = int((present_records / total_attendance_records * 100)) if total_attendance_records > 0 else 100
 
+    departments = Department.objects.all().order_by('name')
+    courses = Course.objects.all().order_by('name')
+
     context = {
         'total_students': total_students,
         'total_faculty': total_faculty,
@@ -50,6 +53,8 @@ def admin_dashboard(request):
         'fees_unpaid': total_fees_unpaid,
         'fees_pending': total_fees_pending,
         'attendance_rate': attendance_rate,
+        'departments': departments,
+        'courses': courses,
     }
     return render(request, 'dashboard/admin_dashboard.html', context)
 
@@ -378,3 +383,166 @@ def save_marks(request):
             messages.error(request, f"Error saving marks: {str(e)}")
             
     return redirect(f'/dashboard/admin/marks/?exam={exam_id}')
+
+@login_required
+def admin_add_faculty(request):
+    if request.user.role != 'ADMIN':
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        
+        faculty_id = request.POST.get('faculty_id')
+        dept_id = request.POST.get('department')
+        designation = request.POST.get('designation')
+        phone = request.POST.get('phone_number')
+        qualification = request.POST.get('qualification')
+        
+        try:
+            if CustomUser.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists.")
+            elif CustomUser.objects.filter(email=email).exists():
+                messages.error(request, "Email already registered.")
+            elif FacultyProfile.objects.filter(faculty_id=faculty_id).exists():
+                messages.error(request, "Faculty ID already registered.")
+            else:
+                user = CustomUser.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role='FACULTY',
+                    is_approved=True
+                )
+                
+                dept = Department.objects.get(id=dept_id) if dept_id else None
+                
+                FacultyProfile.objects.create(
+                    user=user,
+                    faculty_id=faculty_id,
+                    department=dept,
+                    designation=designation,
+                    phone_number=phone,
+                    qualification=qualification
+                )
+                messages.success(request, f"Faculty member '{first_name} {last_name}' added successfully.")
+        except Exception as e:
+            messages.error(request, f"Error adding faculty member: {str(e)}")
+            
+    return redirect('admin_dashboard')
+
+@login_required
+def admin_add_student(request):
+    if request.user.role != 'ADMIN':
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        
+        student_id = request.POST.get('student_id')
+        dept_id = request.POST.get('department')
+        course_id = request.POST.get('course')
+        roll_no = request.POST.get('roll_no')
+        dob = request.POST.get('date_of_birth')
+        phone = request.POST.get('phone_number')
+        address = request.POST.get('address')
+        
+        try:
+            if CustomUser.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists.")
+            elif CustomUser.objects.filter(email=email).exists():
+                messages.error(request, "Email already registered.")
+            elif StudentProfile.objects.filter(student_id=student_id).exists():
+                messages.error(request, "Student ID already exists.")
+            else:
+                user = CustomUser.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role='STUDENT',
+                    is_approved=True
+                )
+                
+                dept = Department.objects.get(id=dept_id) if dept_id else None
+                course = Course.objects.get(id=course_id) if course_id else None
+                
+                StudentProfile.objects.create(
+                    user=user,
+                    student_id=student_id,
+                    department=dept,
+                    course=course,
+                    roll_no=roll_no,
+                    date_of_birth=dob if dob else None,
+                    phone_number=phone,
+                    admission_year=2026,
+                    address=address
+                )
+                messages.success(request, f"Student '{first_name} {last_name}' added successfully.")
+        except Exception as e:
+            messages.error(request, f"Error adding student: {str(e)}")
+            
+    return redirect('admin_dashboard')
+
+@login_required
+def admin_add_department(request):
+    if request.user.role != 'ADMIN':
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        code = request.POST.get('code')
+        
+        try:
+            if Department.objects.filter(code=code).exists():
+                messages.error(request, f"Department code '{code}' already exists.")
+            else:
+                Department.objects.create(name=name, code=code)
+                messages.success(request, f"Department '{name}' added successfully.")
+        except Exception as e:
+            messages.error(request, f"Error adding department: {str(e)}")
+            
+    return redirect('admin_dashboard')
+
+@login_required
+def admin_add_course(request):
+    if request.user.role != 'ADMIN':
+        messages.error(request, "Access denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        code = request.POST.get('code')
+        dept_id = request.POST.get('department')
+        duration_years = request.POST.get('duration_years', 4)
+        
+        try:
+            if Course.objects.filter(code=code).exists():
+                messages.error(request, f"Course code '{code}' already exists.")
+            else:
+                dept = get_object_or_404(Department, id=dept_id)
+                Course.objects.create(
+                    name=name,
+                    code=code,
+                    department=dept,
+                    duration_years=int(duration_years)
+                )
+                messages.success(request, f"Course '{name}' added successfully.")
+        except Exception as e:
+            messages.error(request, f"Error adding course: {str(e)}")
+            
+    return redirect('admin_dashboard')
+

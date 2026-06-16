@@ -13,4 +13,8 @@ urlpatterns = [
     path('marks/', views.admin_marks, name='admin_marks'),
     path('marks/add-exam/', views.add_exam, name='admin_add_exam'),
     path('marks/save/', views.save_marks, name='admin_save_marks'),
+    path('faculty/add/', views.admin_add_faculty, name='admin_add_faculty'),
+    path('student/add/', views.admin_add_student, name='admin_add_student'),
+    path('department/add/', views.admin_add_department, name='admin_add_department'),
+    path('course/add/', views.admin_add_course, name='admin_add_course'),
 ]

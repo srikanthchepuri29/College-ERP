@@ -167,3 +167,92 @@ class AttendancePortalTests(TestCase):
         self.assertEqual(record.status, 'PRESENT')
 
 
+class AdminCreationTests(TestCase):
+    def setUp(self):
+        # Admin User
+        self.admin_user = CustomUser.objects.create_user(
+            username="admin1", email="admin1@college.edu", password="password123", role="ADMIN", is_approved=True
+        )
+        # Non-Admin User (Faculty)
+        self.faculty_user = CustomUser.objects.create_user(
+            username="faculty1", email="faculty1@college.edu", password="password123", role="FACULTY", is_approved=True
+        )
+        # Create a Department for reference
+        self.dept = Department.objects.create(name="Electronics", code="ECE")
+        
+        # Create a Course for reference
+        self.course = Course.objects.create(name="B.Tech ECE", code="ECE-BTECH", department=self.dept)
+
+    def test_admin_add_department(self):
+        self.client.login(username="admin1", password="password123")
+        response = self.client.post(reverse('admin_add_department'), {
+            'name': 'Civil Engineering',
+            'code': 'CIVIL'
+        })
+        self.assertRedirects(response, reverse('admin_dashboard'))
+        self.assertTrue(Department.objects.filter(code='CIVIL').exists())
+
+    def test_non_admin_add_department_fails(self):
+        self.client.login(username="faculty1", password="password123")
+        response = self.client.post(reverse('admin_add_department'), {
+            'name': 'Civil Engineering',
+            'code': 'CIVIL'
+        })
+        self.assertRedirects(response, reverse('home'))
+        self.assertFalse(Department.objects.filter(code='CIVIL').exists())
+
+    def test_admin_add_course(self):
+        self.client.login(username="admin1", password="password123")
+        response = self.client.post(reverse('admin_add_course'), {
+            'name': 'M.Tech ECE',
+            'code': 'ECE-MTECH',
+            'department': self.dept.id,
+            'duration_years': 2
+        })
+        self.assertRedirects(response, reverse('admin_dashboard'))
+        self.assertTrue(Course.objects.filter(code='ECE-MTECH').exists())
+
+    def test_admin_add_faculty(self):
+        self.client.login(username="admin1", password="password123")
+        response = self.client.post(reverse('admin_add_faculty'), {
+            'username': 'prof_jane',
+            'email': 'jane@college.edu',
+            'password': 'password123',
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'faculty_id': 'FAC202',
+            'department': self.dept.id,
+            'designation': 'Professor',
+            'phone_number': '1234567890',
+            'qualification': 'Ph.D.'
+        })
+        self.assertRedirects(response, reverse('admin_dashboard'))
+        user = CustomUser.objects.get(username='prof_jane')
+        self.assertTrue(user.is_approved)
+        self.assertEqual(user.role, 'FACULTY')
+        self.assertTrue(FacultyProfile.objects.filter(faculty_id='FAC202').exists())
+
+    def test_admin_add_student(self):
+        self.client.login(username="admin1", password="password123")
+        response = self.client.post(reverse('admin_add_student'), {
+            'username': 'student_bob',
+            'email': 'bob@college.edu',
+            'password': 'password123',
+            'first_name': 'Bob',
+            'last_name': 'Jones',
+            'student_id': 'STU303',
+            'department': self.dept.id,
+            'course': self.course.id,
+            'roll_no': '26ECE12',
+            'date_of_birth': '2005-05-12',
+            'phone_number': '0987654321',
+            'address': '456 Oak Ave'
+        })
+        self.assertRedirects(response, reverse('admin_dashboard'))
+        user = CustomUser.objects.get(username='student_bob')
+        self.assertTrue(user.is_approved)
+        self.assertEqual(user.role, 'STUDENT')
+        self.assertTrue(StudentProfile.objects.filter(student_id='STU303').exists())
+
+
+
